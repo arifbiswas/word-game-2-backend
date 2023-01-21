@@ -41,7 +41,7 @@ async function run (){
                     user_name : req.body.user_name,
                     email : req.body.email,
                     password : req.body.password,
-                    time : 24,
+                    time : 48,
                     startDate : req.body.date,
                     day : 1,
                     task : [{day : 1 , completed : false , date : req.body.date}]
@@ -136,13 +136,13 @@ async function run (){
             const date = new Date().toLocaleDateString();
             const user = await UserCollection.findOne({email : req.query.email});
             if(user){
-            const updateUserTime = await UserCollection.updateOne({email : req.query.email}, {$set : {
+             await UserCollection.updateOne({email : req.query.email}, {$set : {
                 time : parseInt(user?.time) + 24,
             }});
             const newUser = await UserCollection.findOne({email : req.query.email});
             if(user.time < newUser.time){
-                const unCompletedTask = newUser.task.find(task => !task.completed);
-                const AllCompletedTask = newUser.task.filter(task => task.completed);
+                // const unCompletedTask = newUser.task.find(task => !task.completed);
+                const AllCompletedTask = newUser.task.map(task => task);
                 let AllUpdateCompletedTask =[];
                 for(const updateOnUnCompletedTask of AllCompletedTask){
                     updateOnUnCompletedTask.completed = false;
@@ -150,8 +150,8 @@ async function run (){
                 }
                 // console.log(AllUpdateCompletedTask);
                 // console.log(unCompletedTask, AllCompletedTask)
-                const updated = await UserCollection.updateOne({email : req.query?.email} , {$set :{
-                    task : [...AllUpdateCompletedTask,{day : unCompletedTask.day , completed : false , date : date }]
+                await UserCollection.updateOne({email : req.query?.email} , {$set :{
+                    task : [...AllUpdateCompletedTask]
                 }});
                
             }
